@@ -1,0 +1,36 @@
+name: Deploy Node App (Windows App Service)
+
+on:
+  push:
+    branches:
+      - prod
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # or use the version your app uses
+
+      - name: Install dependencies
+        run: npm install
+
+      # (OPTIONAL) If you want to run tests or build steps, add here
+      # - name: Run tests
+      #   run: npm test
+
+      - name: Zip artifact for deployment
+        run: Compress-Archive -Path * -DestinationPath app.zip
+
+      - name: Deploy to Azure Web App (Windows)
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: "chess73server"
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_628C5CD300CA4445955885CDE09E7860 }}
+          package: app.zip
